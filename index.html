@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+      <script type="text/javascript" src="/script/jquery-3.2.1.min.js"></script>
+      <script type="text/javascript" src="/script/canvasjs.min.js"></script>
+      <script type="text/javascript">
+      window.onload = function () {
+            var dt = new Date();
+            var dps = [{x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}, {x: dt, y: 1}];
+
+            var chart = new CanvasJS.Chart("chartContainer",{
+                  title :{
+                        text: "Status Monitor"
+                  },
+                  axisX: {                                  
+                        title: "Time",
+                        interval: 1,
+                        intervalType: "second",
+                        valueFormatString: "HH:mm:ss"
+                  },
+                  axisY: {                                  
+                        title: "Status",
+                        interval: 1
+                  },
+                  data: [{
+                        type: "line",
+                        dataPoints : dps
+                  }]
+            });
+
+            chart.render();   
+            var freq = 1000;
+
+            var updateChart = function () {
+                  $.get( "/var/log/status.txt", function(status) {
+                        var statusValue = 1;
+                        if (status == "ALERT") {
+                              statusValue = 2;
+                        }
+
+                        xVal = new Date();
+                        yVal = statusValue;
+
+                        dps.push({x: xVal,y: yVal});
+                        if (dps.length >  10 ) {
+                              dps.shift();                        
+                        }
+
+                        chart.render();
+                        });
+            };
+
+            setInterval(function(){updateChart()}, freq); 
+      }
+      </script>
+</head>
+<body>
+      <div id="chartContainer" style="height: 300px; width: 100%;">
+      </div>
+</body>
+</html>
